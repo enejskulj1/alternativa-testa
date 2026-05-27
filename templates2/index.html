@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Social Platform</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .post { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        input, textarea, button { margin: 8px 0; padding: 8px; }
+        .logout { position: absolute; top: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <!-- Povezava za odjavo in glava socialnega toka. -->
+    <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    <h1>Social Platform</h1>
+
+    <!-- Obrazec za ustvarjanje nove objave z opcijskim nalaganjem slike. -->
+    <h2>Add Post</h2>
+    <textarea id="text" rows="4" placeholder="What's on your mind?"></textarea>
+    <input type="file" id="image" accept="image/*">
+    <button onclick="addPost()">Post</button>
+
+    <!-- Prikaži vse obstoječe objave iz baze. -->
+    <h2>Posts</h2>
+    <div id="posts">
+        {% for post in posts %}
+        <div class="post">
+            <h3>{{ post.username }}</h3>
+            <p>{{ post.text }}</p>
+            {% if post.image %}
+            <img src="{{ post.image }}" alt="Image" style="max-width: 300px;">
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Pošlji novo objavo na strežnik in osveži ob uspehu.
+        async function addPost() {
+            const text = document.getElementById('text').value;
+            const image = document.getElementById('image').files[0];
+            if (!text && !image) return alert('Add text or image');
+
+            const formData = new FormData();
+            formData.append('text', text);
+            if (image) formData.append('image', image);
+
+            const res = await fetch('/add_post', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error');
+            }
+        }
+    </script>
+</body>
+</html>

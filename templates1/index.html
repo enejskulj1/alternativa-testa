@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personal Notes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .note { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        input, textarea, button { margin: 8px 0; padding: 8px; width: 300px; }
+        .logout { position: absolute; top: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <!-- Povezava za odjavo in glava osebnih zapiskov. -->
+    <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    <h1>Personal Notes</h1>
+
+    <!-- Odsek za ustvarjanje nove opombe. -->
+    <h2>Add Note</h2>
+    <input type="text" id="title" placeholder="Title">
+    <textarea id="content" rows="4" placeholder="Content"></textarea>
+    <button onclick="addNote()">Add Note</button>
+
+    <!-- Prikaži opombe prijavljenega uporabnika z gumbi za urejanje/brisanje. -->
+    <h2>Your Notes</h2>
+    <div id="notes">
+        {% for note in notes %}
+        <div class="note" id="note-{{ note.doc_id }}">
+            <h3>{{ note.title }}</h3>
+            <p>{{ note.content }}</p>
+            <button onclick="editNote({{ note.doc_id }}, {{ note.title|tojson }}, {{ note.content|tojson }})">Edit</button>
+            <button onclick="deleteNote({{ note.doc_id }})">Delete</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Pošlji novo opombo na strežnik in osveži stran, če je uspeh.
+        async function addNote() {
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            if (!title || !content) return alert('Fill all fields');
+
+            const res = await fetch('/add_note', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`
+            });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error');
+            }
+        }
+
+        // Vprašaj za nove vrednosti opombe in pošlji posodobitev.
+        async function editNote(id, oldTitle, oldContent) {
+            const title = prompt('New title', oldTitle);
+            const content = prompt('New content', oldContent);
+            if (!title || !content) return;
+
+            const res = await fetch(`/edit_note/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`
+            });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error');
+            }
+        }
+
+        // Potrdi in izbriši opombo preko delete endpointa.
+        async function deleteNote(id) {
+            if (!confirm('Delete note?')) return;
+
+            const res = await fetch(`/delete_note/${id}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error');
+            }
+        }
+    </script>
+</body>
+</html>

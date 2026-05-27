@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .task { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        input, textarea, select, button { margin: 8px 0; padding: 8px; width: 300px; }
+        .status { color: blue; }
+    </style>
+</head>
+<body>
+    <!-- Glava aplikacije za upravljanje opravil. -->
+    <h1>Task Manager</h1>
+
+    <!-- Odsek za ustvarjanje novega opravila z izbiro statusa. -->
+    <h2>Add Task</h2>
+    <input type="text" id="title" placeholder="Title">
+    <textarea id="description" rows="4" placeholder="Description"></textarea>
+    <select id="status">
+        <option value="todo">To Do</option>
+        <option value="doing">Doing</option>
+        <option value="done">Done</option>
+    </select>
+    <button onclick="addTask()">Add Task</button>
+
+    <!-- Prikaži obstoječa opravila iz TinyDB baze. -->
+    <h2>Tasks</h2>
+    <div id="tasks">
+        {% for task in tasks %}
+        <div class="task" id="task-{{ task.doc_id }}">
+            <h3>{{ task.title }}</h3>
+            <p>{{ task.description }}</p>
+            <p class="status">Status: {{ task.status }}</p>
+            <button onclick="editTask({{ task.doc_id }}, '{{ task.title }}', '{{ task.description }}', '{{ task.status }}')">Edit</button>
+            <button onclick="deleteTask({{ task.doc_id }})">Delete</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Dodaj novo opravilo preko POST in osveži stran ob uspehu.
+        async function addTask() {
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const status = document.getElementById('status').value;
+            if (!title) return alert('Title required');
+
+            const res = await fetch('/add_task', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&status=${status}`
+            });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error');
+            }
+        }
+
+        // Vprašaj uporabnika za posodobitve opravila in pošlji posodobitev strežniku.
+        async function editTask(id, oldTitle, oldDesc, oldStatus) {
+            const title = prompt('New title', oldTitle);
+            const description = prompt('New description', oldDesc);
+            const status = prompt('New status (todo/doing/done)', oldStatus);
+            if (!title) return;
+
+            const res = await fetch(`/edit_task/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&status=${status}`
+            });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error');
+            }
+        }
+
+        // Potrdi pred brisanjem opravila in nato pokliči delete endpoint.
+        async function deleteTask(id) {
+            if (!confirm('Delete task?')) return;
+
+            const res = await fetch(`/delete_task/${id}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error');
+            }
+        }
+    </script>
+</body>
+</html>
