@@ -14,6 +14,7 @@
     <!-- Povezava za odjavo in glava socialnega toka. -->
     <a href="{{ url_for('logout') }}" class="logout">Logout</a>
     <h1>Social Platform</h1>
+    <h2>{{ session['st_posts'] }}</h2>
 
     <!-- Obrazec za ustvarjanje nove objave z opcijskim nalaganjem slike. -->
     <h2>Add Post</h2>

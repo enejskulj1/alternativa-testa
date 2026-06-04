@@ -77,6 +77,8 @@ def add_post():
     user = users_db.get(doc_id=user_id)
     username = user['username']
     posts_db.insert({'user_id': user_id, 'username': username, 'text': text, 'image': image_path})
+
+    session['st_posts'] = session.get('st_posts', 0) + 1
     return jsonify({'success': True})
 
 if __name__ == '__main__':
