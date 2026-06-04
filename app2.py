@@ -72,7 +72,7 @@ def add_post():
         filename = secure_filename(image.filename)
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         image.save(image_path)
-        image_path = f'/static/uploads/{filename}'  # relativna pot za prikaz v predlogi
+        image_path = url_for('static', filename=f'uploads/{filename}')  # relativna pot za prikaz v predlogi
     user_id = session['user_id']
     user = users_db.get(doc_id=user_id)
     username = user['username']

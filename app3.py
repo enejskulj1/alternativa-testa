@@ -72,6 +72,19 @@ def delete_task(task_id):
     # Vrni odgovor o uspešnem brisanju.
     return jsonify({'success': True})
 
+@app.route('/done_task/<int:task_id>', methods=['POST'])
+def done_task(task_id):
+    """Pot za označitev naloge kot opravljene: posodobi status naloge na 'done'."""
+    # Preveri, ali naloga obstaja v bazi.
+    task = tasks_db.get(doc_id=task_id)
+    if not task:
+        return jsonify({'error': 'Task not found'}), 404
+    # Posodobi status naloge na 'done'.
+    tasks_db.update({'status': 'done'}, doc_ids=[task_id])
+    # Vrni potrditev uspešnosti operacije.
+    return jsonify({'success': True})
+
+
 if __name__ == '__main__':
     # Zaženi razvojni strežnik Flask na portu 5002 z vključenim načinom debug.
     # Debug način je koristen med razvojem, ker ponovno naloži kodo ob spremembi.

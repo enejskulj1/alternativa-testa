@@ -28,7 +28,7 @@
         <div class="note" id="note-{{ note.doc_id }}">
             <h3>{{ note.title }}</h3>
             <p>{{ note.content }}</p>
-            <button onclick="editNote({{ note.doc_id }}, {{ note.title|tojson }}, {{ note.content|tojson }})">Edit</button>
+            <button onclick='editNote({{ note.doc_id }}, {{ note.title|tojson }}, {{ note.content|tojson }})'>Edit</button>
             <button onclick="deleteNote({{ note.doc_id }})">Delete</button>
         </div>
         {% endfor %}

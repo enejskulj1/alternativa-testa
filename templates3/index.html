@@ -24,6 +24,7 @@
         <option value="done">Done</option>
     </select>
     <button onclick="addTask()">Add Task</button>
+    <button onclick="change_background_color()">Change Background Color</button>
 
     <!-- Prikaži obstoječa opravila iz TinyDB baze. -->
     <h2>Tasks</h2>
@@ -35,6 +36,7 @@
             <p class="status">Status: {{ task.status }}</p>
             <button onclick="editTask({{ task.doc_id }}, '{{ task.title }}', '{{ task.description }}', '{{ task.status }}')">Edit</button>
             <button onclick="deleteTask({{ task.doc_id }})">Delete</button>
+            <button onclick="done_task({{ task.doc_id }})">MARK AS DONE</button>
         </div>
         {% endfor %}
     </div>
@@ -91,6 +93,24 @@
             } else {
                 alert('Error');
             }
+        }
+
+        //button za označitev naloge kot opravljene, ki pošlje zahtevo na strežnik in osveži stran ob uspehu.
+        async function done_task(id){
+            const res = await fetch(`/done_task/${id}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error');
+            }
+        }
+
+        // Spremeni barvo ozadja naključno ob kliku na gumb.
+        function change_background_color() {
+            const colors = ['white', 'green', 'purple', 'blue', 'pink', 'yellow'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            document.body.style.backgroundColor = randomColor;
         }
     </script>
 </body>
